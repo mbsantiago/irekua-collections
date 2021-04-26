@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "irekua-collections"
+version = "0.1.0"
+description = ""
+authors = ["mbsantiago <santiago.mbal@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+Sphinx = "^3.5.4"
+sphinx-autoapi = "^1.8.1"
+coverage = {extras = ["toml"], version = "^5.5"}
+python-language-server = {extras = ["all"], version = "^0.36.2"}
+pyls-mypy = "^0.1.8"
+black = "^21.4b0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.coverage.run]
+include = ["irekua_collections/*"]
