@@ -5,14 +5,16 @@ from typing import List
 from dataclasses import dataclass
 from dataclasses import field
 
-from .annotations import UserAnnotation
-from .base import BaseMetaclass
+from irekua_collections.dataclasses.annotations import UserAnnotation
+from irekua_collections.dataclasses.base import BaseMetaclass
+from irekua_collections.dataclasses.base import BaseClass
 
 
 @dataclass
-class Item(metaclass=BaseMetaclass):
-    path: str
+class Item(BaseClass, metaclass=BaseMetaclass):
+    path: Optional[str] = None
     item_type: Optional[str] = None
+    hash: Optional[str] = None
 
     # Labelling info
     ready: bool = False

@@ -1,11 +1,12 @@
 from typing import Optional
 from dataclasses import dataclass
 
-from .base import BaseMetaclass
+from irekua_collections.dataclasses.base import BaseMetaclass
+from irekua_collections.dataclasses.base import BaseClass
 
 
 @dataclass
-class Term(metaclass=BaseMetaclass):
+class Term(BaseClass, metaclass=BaseMetaclass):
     value: str
     term_type: Optional[str] = None
     parent_id: Optional[int] = None

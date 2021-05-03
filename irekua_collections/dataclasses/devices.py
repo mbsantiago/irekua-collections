@@ -2,11 +2,12 @@ from typing import Optional
 from typing import Any
 from dataclasses import dataclass
 
-from .base import BaseMetaclass
+from irekua_collections.dataclasses.base import BaseMetaclass
+from irekua_collections.dataclasses.base import BaseClass
 
 
 @dataclass
-class Device(metaclass=BaseMetaclass):
+class Device(BaseClass, metaclass=BaseMetaclass):
     device_type: Optional[str] = None
     brand: Optional[str] = None
     model: Optional[str] = None

@@ -3,12 +3,13 @@ from typing import Optional
 from typing import Any
 from dataclasses import dataclass
 
-from irekua_collections.geometry import Point
+from irekua_collections.dataclasses.geometry import Point
 from irekua_collections.dataclasses.base import BaseMetaclass
+from irekua_collections.dataclasses.base import BaseClass
 
 
 @dataclass
-class Deployment(metaclass=BaseMetaclass):
+class Deployment(BaseClass, metaclass=BaseMetaclass):
     sampling_event_id: Optional[int] = None
     device_id: Optional[int] = None
     deployment_type: Optional[str] = None

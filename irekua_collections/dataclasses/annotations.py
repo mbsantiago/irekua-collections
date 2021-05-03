@@ -1,15 +1,16 @@
 from typing import Optional
 from typing import Any
-from typing import List
+from typing import Iterable
 from dataclasses import dataclass
 from dataclasses import field
 
-from .base import BaseMetaclass
-from .terms import Term
+from irekua_collections.dataclasses.base import BaseMetaclass
+from irekua_collections.dataclasses.base import BaseClass
+from irekua_collections.dataclasses.terms import Term
 
 
 @dataclass
-class EventType(metaclass=BaseMetaclass):
+class EventType(BaseClass, metaclass=BaseMetaclass):
     name: str
     parent_id: Optional[int] = None
 
@@ -17,11 +18,11 @@ class EventType(metaclass=BaseMetaclass):
 
 
 @dataclass
-class Annotation(metaclass=BaseMetaclass):
+class Annotation(BaseClass, metaclass=BaseMetaclass):
     item_id: int
     event_type_id: Optional[int] = None
     annotation_type: Optional[str] = None
-    labels: List[Term] = field(default_factory=list)
+    labels: Iterable[Term] = field(default_factory=list)
     geometry: Optional[Any] = None
 
     relations = [

@@ -1,8 +1,21 @@
 from typing import Optional
+from collections import defaultdict
 from itertools import count
 
 
-class DoesNotExist(Exception):
+class StorageError(Exception):
+    """Errors from storing items"""
+
+
+class ConfigurationError(StorageError):
+    """Raised when storages are not available or incorrectly configured"""
+
+
+class DoesNotExist(StorageError):
+    """The object you are looking for does not exist in the collection"""
+
+
+class MultipleMatches(StorageError):
     """The object you are looking for does not exist in the collection"""
 
 
@@ -42,10 +55,10 @@ class Storage:
 
         options = list(self.filter(**query))
         if len(options) > 1:
-            raise ValueError("Multiple matches")
+            raise MultipleMatches("Multiple matches")
 
         if len(options) == 0:
-            raise ValueError("Does not exist")
+            raise DoesNotExist("Does not exist")
 
         return options[0]
 
@@ -58,7 +71,10 @@ class Storages:
             fields = []
 
         self.fields = fields
-        self.storages = {field: self.storage_factory() for field in fields}
+        self.storages = defaultdict(self.storage_factory)
+
+        for field in self.fields:
+            self.storages[field]
 
     def __contains__(self, key) -> bool:
         return key in self.storages

@@ -1,7 +1,7 @@
 import datetime
 from irekua_collections import Collection
 from irekua_collections import dataclasses as dt
-from irekua_collections import geometry as geom
+from irekua_collections.dataclasses import geometry as geom
 
 
 models = [

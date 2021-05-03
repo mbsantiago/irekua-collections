@@ -3,11 +3,12 @@ from typing import Optional
 from typing import Any
 from dataclasses import dataclass
 
-from .base import BaseMetaclass
+from irekua_collections.dataclasses.base import BaseMetaclass
+from irekua_collections.dataclasses.base import BaseClass
 
 
 @dataclass
-class SamplingEvent(metaclass=BaseMetaclass):
+class SamplingEvent(BaseClass, metaclass=BaseMetaclass):
     sampling_event_type: Optional[str] = None
     site_id: Optional[int] = None
     started_on: Optional[datetime.datetime] = None

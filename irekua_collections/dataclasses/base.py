@@ -22,15 +22,12 @@ class BaseClass:
 
 def build_property(cls, name, model):
     def getter(self):
+        storages = cls.storage
+
         value = getattr(self, f"{name}_id", None)
 
         if value is None:
-            raise ValueError("No related object")
-
-        storages = storage.get()
-
-        if storages is None:
-            raise ValueError("Not within a collection")
+            raise storage.DoesNotExist("No related object")
 
         return storages[model].get_by_id(value)
 
@@ -54,3 +51,29 @@ class BaseMetaclass(type):
             setattr(cls, name, build_property(cls, name, model))
 
         return cls
+
+    @property
+    def name(cls) -> str:
+        return str(cls.__qualname__)
+
+    @property
+    def storage(cls) -> storage.Storages:
+        storages = storage.get()
+
+        if storages is None:
+            raise storage.ConfigurationError("Not within a collection")
+
+        return storages
+
+    def get(cls, id=None, **query):
+        return cls.storage[cls.name].get(id=id, **query)
+
+    def get_or_create(cls, id=None, defaults=None, **query):
+        if defaults is None:
+            defaults = {}
+
+        try:
+            return cls.get(id=id, **query)
+
+        except storage.DoesNotExist:
+            return cls(**defaults, **query)
