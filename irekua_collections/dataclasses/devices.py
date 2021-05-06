@@ -2,6 +2,7 @@ from typing import Optional
 from typing import Any
 from dataclasses import dataclass
 
+from irekua_collections.storage import DBID
 from irekua_collections.dataclasses.base import BaseMetaclass
 from irekua_collections.dataclasses.base import BaseClass
 
@@ -12,3 +13,4 @@ class Device(BaseClass, metaclass=BaseMetaclass):
     brand: Optional[str] = None
     model: Optional[str] = None
     metadata: Optional[Any] = None
+    id: Optional[DBID] = None

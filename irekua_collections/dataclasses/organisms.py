@@ -5,6 +5,7 @@ from typing import List
 from dataclasses import dataclass
 from dataclasses import field
 
+from irekua_collections.storage import DBID
 from irekua_collections.dataclasses.base import BaseMetaclass
 from irekua_collections.dataclasses.base import BaseClass
 from irekua_collections.dataclasses.terms import Term
@@ -17,6 +18,7 @@ class Organism(BaseClass, metaclass=BaseMetaclass):
     identification_info: Optional[Any] = None
     metadata: Optional[Any] = None
     labels: List[Term] = field(default_factory=list)
+    id: Optional[DBID] = None
 
 
 @dataclass
@@ -24,6 +26,7 @@ class OrganismCapture(BaseClass, metaclass=BaseMetaclass):
     organism_id: int
     deployment_id: Optional[int] = None
     metadata: Optional[Any] = None
+    id: Optional[int] = None
 
     relations = [
         ("deployment", "Deployment"),

@@ -5,6 +5,7 @@ from typing import List
 from dataclasses import dataclass
 from dataclasses import field
 
+from irekua_collections.storage import DBID
 from irekua_collections.dataclasses.annotations import UserAnnotation
 from irekua_collections.dataclasses.base import BaseMetaclass
 from irekua_collections.dataclasses.base import BaseClass
@@ -14,20 +15,21 @@ from irekua_collections.dataclasses.base import BaseClass
 class Item(BaseClass, metaclass=BaseMetaclass):
     path: Optional[str] = None
     item_type: Optional[str] = None
-    hash: Optional[str] = None
+    hash: Optional[str] = field(default=None, repr=False)
 
     # Labelling info
     ready: bool = False
-    labels: List[UserAnnotation] = field(default_factory=list)
+    annotations: List[UserAnnotation] = field(default_factory=list, repr=False)
 
     # Item media info
-    media_info: Optional[Any] = None
+    media_info: Optional[Any] = field(default=None, repr=False)
 
     # Authorship info
+    collection: Optional[str] = None
     owner: Optional[str] = None
 
     # Potential hierachical item structure
-    parent_id: Optional[int] = None
+    parent_id: Optional[int] = field(default=None, repr=False)
 
     # Item metadata
     site_id: Optional[int] = None
@@ -38,7 +40,8 @@ class Item(BaseClass, metaclass=BaseMetaclass):
     organism_capture_id: Optional[int] = None
 
     # Additional metadata
-    metadata: Optional[Any] = None
+    metadata: Optional[Any] = field(default=None, repr=False)
+    id: Optional[DBID] = None
 
     relations = [
         ("parent", "Item"),

@@ -1,4 +1,13 @@
+import os
+import json
+
 from typing import Optional
+from typing import Union
+from typing import Dict
+from typing import Any
+from typing import Generator
+from typing import Iterator
+from dataclasses import asdict
 from collections import defaultdict
 from itertools import count
 
@@ -27,29 +36,44 @@ def satisfies_query(obj, query):
     return True
 
 
+DBID = Union[str, int]
+
+
 class Storage:
     def __init__(self):
-        self.objects = {}
-        self.counter = count()
+        self.objects: Dict[DBID, Any] = {}
+        self.counter: Iterator[int] = count()
 
-    def add(self, obj) -> None:
-        id = next(self.counter)
-        obj.id = id
-        self.objects[id] = obj
+    def add(self, obj: Any) -> None:
+        if obj.id is None:
+            id = next(self.counter)
+            obj.id = id
 
-    def filter(self, **query):
+        self.objects[obj.id] = obj
+
+    def filter(self, **query) -> Generator[Any, None, None]:
         for obj in self.objects.values():
             if satisfies_query(obj, query):
                 yield obj
 
-    def get_by_id(self, id):
+    def __iter__(self) -> Generator[Any, None, None]:
+        for obj in self.objects.values():
+            yield obj
+
+    def __len__(self) -> int:
+        return len(self.objects)
+
+    def count(self) -> int:
+        return len(self.objects)
+
+    def get_by_id(self, id: int) -> Any:
         try:
             return self.objects[id]
 
         except KeyError:
             raise DoesNotExist(f"No object with id {id} exists")
 
-    def get(self, id=None, **query):
+    def get(self, id: Optional[int] = None, **query) -> Any:
         if id is not None:
             return self.get_by_id(id)
 
@@ -62,17 +86,55 @@ class Storage:
 
         return options[0]
 
+    def all(self) -> list:
+        return list(self.objects.values())
+
+    @classmethod
+    def load(cls, directory, constructor=None):
+        if constructor is None:
+            constructor = lambda x: x
+
+        with open(os.path.join(directory, ".storage.json"), "r") as jsonfile:
+            paths = json.load(jsonfile)
+
+        storage = cls()
+        for _id, path in paths.items():
+            try:
+                _id = int(_id)
+            except (ValueError, TypeError):
+                pass
+            storage.objects[_id] = constructor(
+                load_json(os.path.join(directory, path))
+            )
+
+        return storage
+
+    def dump(self, directory, serializer=None):
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        if serializer is None:
+            serializer = asdict
+
+        paths = {key: f"{key}.json" for key in self.objects.keys()}
+        with open(os.path.join(directory, ".storage.json"), "w") as jsonfile:
+            json.dump(paths, jsonfile)
+
+        for key, value in self.objects.items():
+            path = os.path.join(directory, paths[key])
+            with open(path, "w") as jsonfile:
+                json.dump(serializer(value), jsonfile)
+
 
 class Storages:
-    storage_factory = Storage
+    storage_class = Storage
 
     def __init__(self, fields=None):
         if fields is None:
             fields = []
 
         self.fields = fields
-        self.storages = defaultdict(self.storage_factory)
-
+        self.storages = defaultdict(self.storage_class)
         for field in self.fields:
             self.storages[field]
 
@@ -83,21 +145,71 @@ class Storages:
         return self.storages[key]
 
     def __enter__(self):
-        self.__current = get()
-        set(self)
+        self.__current = get_storage()
+        set_storage(self)
 
     def __exit__(self, *args):
-        set(self.__current)
+        set_storage(self.__current)
+
+    def get_config(self, fields=None):
+        if fields is None:
+            fields = list(self.storages.keys())
+
+        return {
+            "fields": fields,
+            "directories": {
+                key: key.lower().replace(" ", "_") for key in fields
+            },
+        }
+
+    def dump(self, directory, config=None, fields=None):
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        if config is None:
+            config = self.get_config(fields=fields)
+
+        fields = [f for f in config["fields"] if f in fields]
+        for field in fields:
+            subdir = config["directories"].get(field, field.lower())
+            self.storages[field].dump(os.path.join(directory, subdir))
+
+    @classmethod
+    def load(cls, directory, config=None, constructors=None):
+        if constructors is None:
+            constructors = {}
+
+        if config is None:
+            config = cls.get_config()
+
+        fields = config.get("fields", [])
+        storages = cls(fields)
+
+        directories = config.get("directories", {})
+        for field in fields:
+            path = os.path.join(
+                directory, directories.get(field, field.lower())
+            )
+            if not os.path.exists(path):
+                raise IOError("Storage is not complete")
+
+            storage = cls.storage_class.load(
+                path,
+                constructor=constructors.get(field),
+            )
+            storages.storages[field] = storage
+
+        return storages
 
 
 _default: Optional[Storages] = None
 
 
-def get() -> Optional[Storages]:
+def get_storage() -> Optional[Storages]:
     return _default
 
 
-def set(storage: Storages) -> None:
+def set_storage(storage: Storages) -> None:
     global _default
 
     if storage is None:
@@ -108,3 +220,8 @@ def set(storage: Storages) -> None:
         raise ValueError
 
     _default = storage
+
+
+def load_json(path):
+    with open(path, "r") as jsonfile:
+        return json.load(jsonfile)

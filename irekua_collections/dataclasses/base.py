@@ -1,4 +1,3 @@
-from typing import Optional
 from dataclasses import asdict
 
 from irekua_collections import storage
@@ -6,14 +5,12 @@ from irekua_collections import storage
 
 class BaseClass:
     def __post_init__(self):
-        self.id: Optional[int] = None
-
-        storages = storage.get()
+        storages = storage.get_storage()
 
         if storages is None:
             return
 
-        store = storages[type(self).__qualname__]
+        store = storages[type(self)._name]
         store.add(self)
 
     def asdict(self):
@@ -47,18 +44,17 @@ class BaseMetaclass(type):
 
         cls = super().__new__(cls, name, bases, dct)
 
+        if not hasattr(cls, "_name"):
+            cls._name = name
+
         for name, model in getattr(cls, "relations", []):
             setattr(cls, name, build_property(cls, name, model))
 
         return cls
 
     @property
-    def name(cls) -> str:
-        return str(cls.__qualname__)
-
-    @property
     def storage(cls) -> storage.Storages:
-        storages = storage.get()
+        storages = storage.get_storage()
 
         if storages is None:
             raise storage.ConfigurationError("Not within a collection")
@@ -66,7 +62,7 @@ class BaseMetaclass(type):
         return storages
 
     def get(cls, id=None, **query):
-        return cls.storage[cls.name].get(id=id, **query)
+        return cls.storage[cls._name].get(id=id, **query)
 
     def get_or_create(cls, id=None, defaults=None, **query):
         if defaults is None:

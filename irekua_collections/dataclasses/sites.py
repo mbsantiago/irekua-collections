@@ -4,6 +4,7 @@ from typing import Iterable
 from dataclasses import dataclass
 from dataclasses import field
 
+from irekua_collections.storage import DBID
 from irekua_collections.dataclasses.geometry import Geometry
 from irekua_collections.dataclasses.terms import Term
 from irekua_collections.dataclasses.base import BaseMetaclass
@@ -15,6 +16,7 @@ class Locality(BaseClass, metaclass=BaseMetaclass):
     name: Optional[str]
     locality_type: Optional[str] = None
     parent_id: Optional[int] = None
+    id: Optional[DBID] = None
 
     relations = [
         ("parent", "Locality"),
@@ -23,13 +25,14 @@ class Locality(BaseClass, metaclass=BaseMetaclass):
 
 @dataclass
 class Site(BaseClass, metaclass=BaseMetaclass):
-    geometry: Optional[Geometry] = None
     name: Optional[str] = None
+    geometry: Optional[Geometry] = None
     site_type: Optional[str] = None
     geometry_type: Optional[str] = None
     parent_id: Optional[int] = None
     metadata: Optional[Any] = None
     altitude: Optional[float] = None
+    id: Optional[DBID] = None
 
     localities: Iterable[Locality] = field(default_factory=list)
     descriptors: Iterable[Term] = field(default_factory=list)

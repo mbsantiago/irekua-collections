@@ -1,14 +1,13 @@
-from typing import Optional
 from typing import Union
 from typing import List
 from dataclasses import dataclass
 from dataclasses import field
 
 
-@dataclass
+@dataclass(frozen=True)
 class Point:
-    latitude: float
-    longitude: float
+    x: float
+    y: float
 
 
 Path = List[Point]
@@ -22,7 +21,7 @@ class LineString:
 @dataclass
 class Polygon:
     exterior: Path
-    interior: Optional[List[Path]] = field(default_factory=list)
+    interior: List[Path] = field(default_factory=list)
 
 
 @dataclass
@@ -48,3 +47,46 @@ Geometry = Union[
     MultiLineString,
     MultiPolygon,
 ]
+
+
+def _build_point(data):
+    return Point(**data)
+
+
+def _build_linestring(data):
+    return LineString([Point(**p) for p in data["path"]])
+
+
+def _build_polygon(data):
+    return Polygon(
+        exterior=[Point(**p) for p in data["exterior"]],
+        interior=[
+            [Point(**p) for p in path] for path in data.get("interior", [])
+        ],
+    )
+
+
+def build_geometry(data) -> Geometry:
+    if "x" in data:
+        return _build_point(data)
+
+    if "path" in data:
+        return _build_linestring(data)
+
+    if "exterior" in data:
+        return _build_polygon(data)
+
+    if "points" in data:
+        return MultiPoint(points=[_build_point(p) for p in data["points"]])
+
+    if "linestrings " in data:
+        return MultiLineString(
+            linestrings=[_build_linestring(ls) for ls in data["linestrings"]]
+        )
+
+    if "polygons" in data:
+        return MultiLineString(
+            linestrings=[_build_polygon(p) for p in data["polygons"]]
+        )
+
+    raise NotImplementedError
