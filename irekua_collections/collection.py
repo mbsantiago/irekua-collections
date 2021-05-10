@@ -1,4 +1,3 @@
-import json
 import os
 from irekua_collections.storage import Storages
 from irekua_collections import dataclasses
@@ -31,7 +30,10 @@ class Collection:
 
     def __init__(self, storage=None):
         if storage is None:
-            storage = Storages(self.get_fields())
+            storage = Storages(
+                fields=self.get_fields(),
+                name="collection",
+            )
 
         self.storage = storage
 
@@ -60,35 +62,7 @@ class Collection:
         }
 
     def get_config(self, fields=None):
-        if fields is None:
-            fields = self.fields
-
-        return {
-            "fields": fields,
-            "directories": {
-                key: key.lower().replace(" ", "_") for key in fields
-            },
-        }
-
-    def save_config(self, directory, config=None):
-        if config is None:
-            config = self.get_config()
-
-        path = os.path.join(directory, "collection.json")
-        with open(path, "w") as jsonfile:
-            json.dump(config, jsonfile)
-
-    @staticmethod
-    def load_config(directory):
-        if not os.path.exists(directory):
-            raise IOError(f"Directory does not exist {directory}")
-
-        config_file = os.path.join(directory, "collection.json")
-
-        if not os.path.exists(config_file):
-            raise ValueError("No storage configuration file at directory")
-
-        return load_json(config_file)
+        return self.storage.get_config()
 
     def dump(self, directory: str, config=None, fields=None) -> None:
         if config is None:
@@ -100,8 +74,6 @@ class Collection:
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        self.save_config(directory, config=config)
-
         self.storage.dump(
             directory,
             config=config,
@@ -109,16 +81,20 @@ class Collection:
         )
 
     @classmethod
-    def load(cls, directory: str, config=None, constructors=None):
-        if config is None:
-            config = cls.load_config(directory)
-
+    def load(
+        cls,
+        directory: str,
+        name: str = "collection",
+        config=None,
+        constructors=None,
+    ):
         if constructors is None:
             constructors = cls.get_constructors()
 
         return cls(
             Storages.load(
                 directory,
+                name=name,
                 config=config,
                 constructors=constructors,
             )
@@ -127,8 +103,3 @@ class Collection:
 
 for field in Collection.fields:
     setattr(Collection, field.lower(), build_field_property(field))
-
-
-def load_json(path):
-    with open(path, "r") as jsonfile:
-        return json.load(jsonfile)

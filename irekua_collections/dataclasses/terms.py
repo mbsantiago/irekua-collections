@@ -8,7 +8,7 @@ from irekua_collections.dataclasses.base import BaseClass
 
 @dataclass
 class Term(BaseClass, metaclass=BaseMetaclass):
-    value: str
+    value: Optional[str] = None
     term_type: Optional[str] = None
 
     parent_id: Optional[DBID] = None

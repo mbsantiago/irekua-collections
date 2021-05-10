@@ -22,3 +22,6 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.coverage.run]
 include = ["irekua_collections/*"]
+
+[tool.black]
+line_length=79

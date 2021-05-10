@@ -13,9 +13,8 @@ from irekua_collections.dataclasses.base import BaseClass
 
 @dataclass
 class Locality(BaseClass, metaclass=BaseMetaclass):
-    name: Optional[str]
+    name: Optional[str] = None
     locality_type: Optional[str] = None
-
     parent_id: Optional[DBID] = None
     id: Optional[DBID] = None
 

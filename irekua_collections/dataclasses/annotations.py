@@ -12,7 +12,7 @@ from irekua_collections.dataclasses.terms import Term
 
 @dataclass
 class EventType(BaseClass, metaclass=BaseMetaclass):
-    name: str
+    name: Optional[str] = None
     parent_id: Optional[DBID] = None
     id: Optional[DBID] = None
 

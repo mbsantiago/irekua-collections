@@ -1,20 +1,9 @@
+from typing import Optional
 from dataclasses import asdict
+from dataclasses import dataclass
 
 from irekua_collections import storage
-
-
-class BaseClass:
-    def __post_init__(self):
-        storages = storage.get_storage()
-
-        if storages is None:
-            return
-
-        store = storages[type(self)._name]
-        store.add(self)
-
-    def asdict(self):
-        return asdict(self)
+from irekua_collections.storage import DBID
 
 
 def build_property(cls, name, model):
@@ -39,9 +28,6 @@ def build_property(cls, name, model):
 
 class BaseMetaclass(type):
     def __new__(cls, name, bases, dct):
-        if BaseClass not in bases:
-            bases = (*bases, BaseClass)
-
         cls = super().__new__(cls, name, bases, dct)
 
         if not hasattr(cls, "_name"):
@@ -73,3 +59,20 @@ class BaseMetaclass(type):
 
         except storage.DoesNotExist:
             return cls(**defaults, **query)
+
+
+@dataclass
+class BaseClass:
+    id: Optional[DBID] = None
+
+    def __post_init__(self):
+        storages = storage.get_storage()
+
+        if storages is None:
+            return
+
+        store = storages[type(self)._name]
+        store.add(self)
+
+    def asdict(self):
+        return asdict(self)
