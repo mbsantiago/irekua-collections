@@ -11,8 +11,8 @@ from irekua_collections.dataclasses.base import BaseClass
 
 @dataclass
 class Deployment(BaseClass, metaclass=BaseMetaclass):
-    sampling_event_id: Optional[int] = None
-    device_id: Optional[int] = None
+    sampling_event_id: Optional[DBID] = None
+    device_id: Optional[DBID] = None
     deployment_type: Optional[str] = None
     deployed_on: Optional[datetime.datetime] = None
     recovered_on: Optional[datetime.datetime] = None

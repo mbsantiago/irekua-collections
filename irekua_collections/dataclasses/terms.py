@@ -10,7 +10,8 @@ from irekua_collections.dataclasses.base import BaseClass
 class Term(BaseClass, metaclass=BaseMetaclass):
     value: str
     term_type: Optional[str] = None
-    parent_id: Optional[int] = None
+
+    parent_id: Optional[DBID] = None
     id: Optional[DBID] = None
 
     relations = [("parent", "Term")]

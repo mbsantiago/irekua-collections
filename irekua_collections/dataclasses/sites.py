@@ -15,7 +15,8 @@ from irekua_collections.dataclasses.base import BaseClass
 class Locality(BaseClass, metaclass=BaseMetaclass):
     name: Optional[str]
     locality_type: Optional[str] = None
-    parent_id: Optional[int] = None
+
+    parent_id: Optional[DBID] = None
     id: Optional[DBID] = None
 
     relations = [
@@ -29,9 +30,10 @@ class Site(BaseClass, metaclass=BaseMetaclass):
     geometry: Optional[Geometry] = None
     site_type: Optional[str] = None
     geometry_type: Optional[str] = None
-    parent_id: Optional[int] = None
     metadata: Optional[Any] = None
     altitude: Optional[float] = None
+
+    parent_id: Optional[DBID] = None
     id: Optional[DBID] = None
 
     localities: Iterable[Locality] = field(default_factory=list)

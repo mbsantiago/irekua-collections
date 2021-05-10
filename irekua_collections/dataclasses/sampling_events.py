@@ -12,11 +12,11 @@ from irekua_collections.dataclasses.base import BaseClass
 class SamplingEvent(BaseClass, metaclass=BaseMetaclass):
     name: Optional[str] = None
     sampling_event_type: Optional[str] = None
-    site_id: Optional[int] = None
     started_on: Optional[datetime.datetime] = None
     ended_on: Optional[datetime.datetime] = None
     metadata: Optional[Any] = None
-    parent_id: Optional[int] = None
+    site_id: Optional[DBID] = None
+    parent_id: Optional[DBID] = None
     id: Optional[DBID] = None
 
     relations = [

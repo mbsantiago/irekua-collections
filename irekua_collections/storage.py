@@ -94,19 +94,14 @@ class Storage:
         if constructor is None:
             constructor = lambda x: x
 
-        with open(os.path.join(directory, ".storage.json"), "r") as jsonfile:
-            paths = json.load(jsonfile)
+        path = os.path.join(directory, "storage.json")
+        with open(path, "r") as jsonfile:
+            objects = json.load(jsonfile)
 
         storage = cls()
-        for _id, path in paths.items():
-            try:
-                _id = int(_id)
-            except (ValueError, TypeError):
-                pass
-            storage.objects[_id] = constructor(
-                load_json(os.path.join(directory, path))
-            )
-
+        storage.objects = {
+            key: constructor(value) for key, value in objects.items()
+        }
         return storage
 
     def dump(self, directory, serializer=None):
@@ -116,14 +111,13 @@ class Storage:
         if serializer is None:
             serializer = asdict
 
-        paths = {key: f"{key}.json" for key in self.objects.keys()}
-        with open(os.path.join(directory, ".storage.json"), "w") as jsonfile:
-            json.dump(paths, jsonfile)
+        path = os.path.join(directory, "storage.json")
+        serialized = {
+            key: serializer(value) for key, value in self.objects.items()
+        }
 
-        for key, value in self.objects.items():
-            path = os.path.join(directory, paths[key])
-            with open(path, "w") as jsonfile:
-                json.dump(serializer(value), jsonfile)
+        with open(path, "w") as jsonfile:
+            json.dump(serialized, jsonfile)
 
 
 class Storages:

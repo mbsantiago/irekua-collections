@@ -13,6 +13,8 @@ def build_field_property(field_name):
 
 class Collection:
     fields = [
+        "UserAnnotation",
+        "Prediction",
         "Deployment",
         "Device",
         "EventType",
@@ -42,6 +44,8 @@ class Collection:
     @classmethod
     def get_constructors(cls):
         return {
+            "UserAnnotation": lambda data: dataclasses.UserAnnotation(**data),
+            "Prediction": lambda data: dataclasses.Prediction(**data),
             "Deployment": lambda data: dataclasses.Deployment(**data),
             "Device": lambda data: dataclasses.Device(**data),
             "EventType": lambda data: dataclasses.EventType(**data),

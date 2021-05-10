@@ -23,10 +23,10 @@ class Organism(BaseClass, metaclass=BaseMetaclass):
 
 @dataclass
 class OrganismCapture(BaseClass, metaclass=BaseMetaclass):
-    organism_id: int
-    deployment_id: Optional[int] = None
+    organism_id: Optional[DBID] = None
+    deployment_id: Optional[DBID] = None
     metadata: Optional[Any] = None
-    id: Optional[int] = None
+    id: Optional[DBID] = None
 
     relations = [
         ("deployment", "Deployment"),

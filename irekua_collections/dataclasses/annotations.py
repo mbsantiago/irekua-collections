@@ -13,16 +13,16 @@ from irekua_collections.dataclasses.terms import Term
 @dataclass
 class EventType(BaseClass, metaclass=BaseMetaclass):
     name: str
-    parent_id: Optional[int] = None
+    parent_id: Optional[DBID] = None
     id: Optional[DBID] = None
 
     relations = [("parent", "EventType")]
 
 
 @dataclass
-class Annotation(BaseClass, metaclass=BaseMetaclass):
-    item_id: Optional[int] = None
-    event_type_id: Optional[int] = None
+class Annotation(BaseClass):
+    item_id: Optional[DBID] = None
+    event_type_id: Optional[DBID] = None
     annotation_type: Optional[str] = None
     labels: Iterable[Term] = field(default_factory=list)
     geometry: Optional[Any] = None
@@ -35,11 +35,11 @@ class Annotation(BaseClass, metaclass=BaseMetaclass):
 
 
 @dataclass
-class UserAnnotation(Annotation):
+class UserAnnotation(Annotation, metaclass=BaseMetaclass):
     author: Optional[str] = None
     quality: Optional[str] = None
 
 
 @dataclass
-class Prediction(Annotation):
+class Prediction(Annotation, metaclass=BaseMetaclass):
     score: Optional[float] = None
