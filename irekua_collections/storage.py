@@ -1,15 +1,14 @@
 import os
 import json
+import random
 
 from typing import NewType
 from typing import Optional
 from typing import Dict
 from typing import Any
 from typing import Generator
-from typing import Iterator
 
 from dataclasses import asdict
-from itertools import count
 
 
 class StorageError(Exception):
@@ -43,14 +42,13 @@ class Storage:
     def __init__(self, name: Optional[str] = None):
         self.name = name
         self.objects: Dict[DBID, Any] = {}
-        self.counter: Iterator[int] = count()
 
     def add(self, obj: Any, id: Optional[DBID] = None) -> None:
         if id is None and hasattr(obj, "id"):
             id = getattr(obj, "id")
 
         if id is None:
-            id = DBID(str(next(self.counter)))
+            id = DBID(str(len(self.objects)))
 
         obj.id = id
         self.objects[id] = obj
@@ -70,8 +68,21 @@ class Storage:
     def __len__(self) -> int:
         return len(self.objects)
 
+    def __getitem__(self, key: DBID) -> Any:
+        return self.objects[key]
+
     def count(self) -> int:
         return len(self.objects)
+
+    def sample(self, n=None, frac=None, **query):
+        if frac is not None:
+            n = int(self.count() * frac)
+
+        if n is None:
+            n = 1
+
+        keys = list(self.objects.keys())
+        return [self.objects[key] for key in random.sample(keys, n)]
 
     def get_by_id(self, id: DBID) -> Any:
         try:
@@ -96,10 +107,11 @@ class Storage:
     def all(self) -> list:
         return list(self.objects.values())
 
+    def ids(self) -> list:
+        return list(self.objects.keys())
+
     def get_config(self):
-        return {
-            "name": self.name,
-        }
+        return {"name": self.name, "path": f"{self.name}.json"}
 
     @classmethod
     def load(cls, directory, config=None, constructor=None):
@@ -110,8 +122,9 @@ class Storage:
             config = {}
 
         name = config.get("name", "storage")
-        path = os.path.join(directory, f"{name}.json")
-        with open(path, "r") as jsonfile:
+        path = config.get("path", f"{name}.json")
+        full_path = os.path.join(directory, path)
+        with open(full_path, "r") as jsonfile:
             objects = json.load(jsonfile)
 
         storage = cls(name=name)
@@ -130,11 +143,11 @@ class Storage:
         if serializer is None:
             serializer = asdict
 
-        path = os.path.join(directory, f"{self.name}.json")
         serialized = {
             key: serializer(value) for key, value in self.objects.items()
         }
 
+        path = os.path.join(directory, config["path"])
         with open(path, "w") as jsonfile:
             json.dump(serialized, jsonfile, default=str)
 
@@ -159,7 +172,7 @@ class Storages:
 
     def __getitem__(self, key) -> Storage:
         if key not in self.storages:
-            self.storages = self.storage_class(name=key)
+            self.storages[key] = self.storage_class(name=key)
 
         return self.storages[key]
 
@@ -176,9 +189,7 @@ class Storages:
 
         return {
             "name": self.name,
-            "storages": {
-                field: self.storages[field].get_config() for field in fields
-            },
+            "storages": {field: self[field].get_config() for field in fields},
         }
 
     def dump(self, directory: str, config=None, fields=None) -> None:
@@ -199,7 +210,7 @@ class Storages:
         # Dump each internal storage
         fields = [f for f in config["storages"] if f in fields]
         for field in fields:
-            self.storages[field].dump(
+            self[field].dump(
                 directory,
                 config=config["storages"][field],
             )
@@ -215,10 +226,11 @@ class Storages:
         if constructors is None:
             constructors = {}
 
-        # Load configurations from file
-        config_file_path = os.path.join(directory, f"{name}.json")
-        with open(config_file_path, "r") as jsonfile:
-            config = json.load(jsonfile)
+        if config is None:
+            # Load configurations from file
+            config_file_path = os.path.join(directory, f"{name}.json")
+            with open(config_file_path, "r") as jsonfile:
+                config = json.load(jsonfile)
 
         fields = config["storages"].keys()
         storages = cls(fields)

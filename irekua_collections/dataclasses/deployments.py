@@ -4,7 +4,7 @@ from typing import Any
 from dataclasses import dataclass
 
 from irekua_collections.storage import DBID
-from irekua_collections.dataclasses.geometry import Point
+from irekua_collections.geometry import Point
 from irekua_collections.dataclasses.base import BaseMetaclass
 from irekua_collections.dataclasses.base import BaseClass
 

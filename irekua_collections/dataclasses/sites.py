@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from dataclasses import field
 
 from irekua_collections.storage import DBID
-from irekua_collections.dataclasses.geometry import Geometry
+from irekua_collections.geometry import Geometry
 from irekua_collections.dataclasses.terms import Term
 from irekua_collections.dataclasses.base import BaseMetaclass
 from irekua_collections.dataclasses.base import BaseClass

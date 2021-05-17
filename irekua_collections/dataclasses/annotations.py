@@ -43,3 +43,4 @@ class UserAnnotation(Annotation, metaclass=BaseMetaclass):
 @dataclass
 class Prediction(Annotation, metaclass=BaseMetaclass):
     score: Optional[float] = None
+    model: Optional[str] = None

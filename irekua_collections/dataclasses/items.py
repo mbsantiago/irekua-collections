@@ -50,5 +50,7 @@ class Item(BaseClass, metaclass=BaseMetaclass):
         ("organism_capture", "OrganismCapture"),
     ]
 
+    @property
     def annotations(self):
-        return self.storage["UserAnnotation"].filter(item_id=self.id)
+        storages = type(self).storage
+        return storages["UserAnnotation"].filter(item_id=self.id)

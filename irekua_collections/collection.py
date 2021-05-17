@@ -23,18 +23,20 @@ class Collection:
         "SamplingEvent",
         "Site",
         "Term",
+        "Locality",
     ]
 
     def get_fields(self):
         return self.fields
 
-    def __init__(self, storage=None):
+    def __init__(self, name=None, storage=None):
         if storage is None:
             storage = Storages(
                 fields=self.get_fields(),
-                name="collection",
+                name=name,
             )
 
+        self.name = name
         self.storage = storage
 
     def __enter__(self):
@@ -87,17 +89,20 @@ class Collection:
         name: str = "collection",
         config=None,
         constructors=None,
+        **kwargs,
     ):
         if constructors is None:
-            constructors = cls.get_constructors()
+            constructors = cls.get_constructors(**kwargs)
 
         return cls(
-            Storages.load(
+            storage=Storages.load(
                 directory,
                 name=name,
                 config=config,
                 constructors=constructors,
-            )
+            ),
+            name=name,
+            **kwargs,
         )
 
 
